@@ -1,1 +1,1 @@
-# FPGA-based accelerator for Adaptive Banded Event Alignment using HLS
+# FPGA accelerator for Adaptive Banded Event Alignment using HLS
