@@ -657,7 +657,7 @@ void scaling_single(core_t* core, db_t* db, int32_t i){
         //todo : verify if this n is needed is needed
         db->n_event_alignment[i] = postalign(
             db->event_alignment[i],db->base_to_event_map[i], &db->events_per_base[i], db->read[i],
-            n_kmers, db->event_align_pairs[i], db->n_event_align_pairs[i], core->kmer_size);
+            n_kmers, db->event_align_pairs[i], db->n_event_align_pairs[i], core->kmer_size, db->read_len[i], db->et[i].n);
 
         //fprintf(stderr,"n_event_alignment %d\n",n_events);
 
@@ -785,8 +785,7 @@ void align_db_FPGA_by_len(core_t * core, db_t* db)
         int event_length = db->et[i].n;
         int read_length = db->read_len[i];
 
-        if(db->sig[i]->nsample>0 && event_length/(float)read_length < AVG_EVENTS_PER_KMER_MAX)
-     //   if(db->sig[i]->nsample>0 && (event_length>=120000 || read_length >=60000 ) && event_length/(float)read_length < AVG_EVENTS_PER_KMER_MAX)
+       if(db->sig[i]->nsample>0 && (event_length>=120000 || read_length >=60000 ) && event_length/(float)read_length < AVG_EVENTS_PER_KMER_MAX)
         {
             ultra_long_reads_id[ultra_long_reads_num] = i;
             ultra_long_reads_num++;
@@ -796,8 +795,6 @@ void align_db_FPGA_by_len(core_t * core, db_t* db)
 
     }
 
-   // fprintf(stderr,"ultra_long_reads_num %d \n", ultra_long_reads_num);
-
     //pipeline kernel to process ultra-long reads
     //ultra_long_pipeline(core, db, ultra_long_reads_id, ultra_long_reads_num);
 
@@ -806,7 +803,7 @@ void align_db_FPGA_by_len(core_t * core, db_t* db)
     pthread_arg_t *tmparg_ultra = NULL;
     pthread_t tid_ultra =  align_ultra_long_async(&tmparg_ultra, core, db, ultra_long_reads_id, ultra_long_reads_num);
 
-/*
+
 
     //fill BUCKET data
     for(int i = 0; i < n_bam_rec; i++)
@@ -843,7 +840,7 @@ void align_db_FPGA_by_len(core_t * core, db_t* db)
 
             if(reads_num[bucket_id]==BUCKET_SIZE)
             {
-            fprintf(stderr, "(%d, %d): bucket %d is full, reads_num %d max_bands %d max_read %d min_read %d max_event %d min_event %d \n", db->batch_idx, bucket, bucket_id,reads_num[bucket_id], max_n_bands[bucket_id], max_read_length[bucket_id], min_read_length[bucket_id], max_event_length[bucket_id], min_event_length[bucket_id] );
+                fprintf(stderr, "(%d, %d): bucket %d is full, reads_num %d max_bands %d max_read %d min_read %d max_event %d min_event %d \n", db->batch_idx, bucket, bucket_id,reads_num[bucket_id], max_n_bands[bucket_id], max_read_length[bucket_id], min_read_length[bucket_id], max_event_length[bucket_id], min_event_length[bucket_id] );
                 core->total_num_bands+= max_n_bands[bucket_id];
                 fill_bucket(core, db,bucket, kmer_size, max_read_length[bucket_id] , max_event_length[bucket_id], reads_num[bucket_id], reads_id[bucket_id]); 
                 reads_num[bucket_id] = 0;
@@ -853,7 +850,7 @@ void align_db_FPGA_by_len(core_t * core, db_t* db)
                 min_event_length[bucket_id] = INT_MAX;
                 max_n_bands[bucket_id] = 0;
                 bucket++;
-                
+                //pthread
             }
         }
         
@@ -872,9 +869,9 @@ void align_db_FPGA_by_len(core_t * core, db_t* db)
             
         }
 
-    }*/
+    }
  
-    align_ultra_long_async_join(tmparg_ultra, tid_ultra);
+     align_ultra_long_async_join(tmparg_ultra, tid_ultra);
 
 
 }
@@ -883,7 +880,7 @@ void transfer_model_to_FPGA(core_t * core)
 {
     fprintf(stderr,"open device\n");
     core->device = xrt::device(0);
-    std::string binaryFile = "/home/centos/Methy/Methy_b100_unified_block/binary_container_Methy_b100_unified_block_v5.awsxclbin";
+    std::string binaryFile = "/home/centos/Methy/Methy_b100_unified_block/binary_container_Methy_b100_unified_block_v6.awsxclbin";
 
     fprintf(stderr,"load binary\n");
     auto uuid = core->device.load_xclbin(binaryFile);
@@ -1012,7 +1009,7 @@ void transfer_model_to_FPGA(core_t * core)
    core->model_data_bo_2.sync(XCL_BO_SYNC_BO_TO_DEVICE);
     auto run_0 = core->kernel_0(1 ,NULL,NULL,NULL,NULL, core->model_data_bo_0,NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
     auto run_1 = core->kernel_1(1 ,NULL,NULL,NULL,NULL, core->model_data_bo_1,NULL, NULL, NULL, NULL, NULL, NULL, NULL,1);
-   auto run_2 = core->kernel_2(1 ,NULL,NULL,NULL,NULL, core->model_data_bo_2,NULL, NULL, NULL, NULL, NULL, 100, 100, 1);
+    auto run_2 = core->kernel_2(1 ,NULL,NULL,NULL,NULL, core->model_data_bo_2,NULL, NULL, NULL, NULL, NULL, 100, 100, 1);
     run_0.wait();
     run_1.wait();
    run_2.wait();
@@ -1260,18 +1257,18 @@ void* align_ultra_long(void* voidargs){
 
         double sync_from_device_start = realtime(); 
       //  fprintf(stderr,"sync to host\n");
-        aligned_pairs_bo.sync(XCL_BO_SYNC_BO_FROM_DEVICE);
+        aligned_pairs_bo.sync(XCL_BO_SYNC_BO_FROM_DEVICE, aligned_pairs_size_bytes,0);
         n_align_bo.sync(XCL_BO_SYNC_BO_FROM_DEVICE, n_align_size_bytes, 0);
         double sync_from_device_end = realtime();
         core->sync_from_device_ultra += sync_from_device_end - sync_from_device_start;
 
-        //result from device
-        if(read_length == 10478)
+       /* //result from device
+        if(read_length == 81616 && event_length == 171579)
         {
             fprintf(stderr,"read_len %d event len %d n_pairs %d\n", read_length, event_length, n_align[0]);
-            for(int j=0;j<n_bands;i++)
-                fprintf(stderr,"%d %d\n",aligned_pairs[j*2], aligned_pairs[j*2+1]);
-        }
+            for(int j=0;j<n_bands;j++)
+               fprintf(stderr,"%d %d\n",aligned_pairs[j*2], aligned_pairs[j*2+1]);
+        }*/
     }
 
     return NULL;
@@ -1357,7 +1354,6 @@ void* align_cpu_reads(void* voidargs){
     }
 
     double cpu_end = realtime();
-   
 
 }
 
@@ -1599,7 +1595,6 @@ void fill_bucket(core_t* core, db_t* db, int bucket, int kmer_size, int max_read
     n_align_bo_0.sync(XCL_BO_SYNC_BO_FROM_DEVICE, n_align_size_bytes, 0);
 
 
-
     if(batch_num_1 > 0)
     {
     //    fprintf(stderr,"kernel1 sync to host\n");
@@ -1612,56 +1607,147 @@ void fill_bucket(core_t* core, db_t* db, int bucket, int kmer_size, int max_read
     double sync_from_device_end = realtime();
     core->sync_from_device += sync_from_device_end - sync_from_device_start;
 
-    //aligned pairs from Device
-    for(int i=0; i<reads_num_0; i++)
+   /* for(int i=0; i<reads_num_0 ; i++)
     {
-      int idx = reads_id[i];
-      int read_length = db->read_len[idx];
-      int event_length = db->et[idx].n;
-      if(read_length==10478)
-      {
-        fprintf(stderr,"read_length=%d event_length=%d n_pairs=%d\n", read_length,event_length, n_align_0[i]);
-        for(int j=0; j<n_bands; j++)
-        {
-            int batch = i/BATCH_SIZE;
-            int read = i%BATCH_SIZE;
-            int ref_pos = aligned_pairs_0[batch * BATCH_SIZE * 2 *n_bands + j*BATCH_SIZE*2 + read* 2];
-            int read_pos = aligned_pairs_0[batch * BATCH_SIZE * 2 *n_bands + j*BATCH_SIZE*2 + read + 1];
-            if(ref_pos>=0)
-                fprintf(stderr,"%d %d\n", ref_pos, read_pos);
-        }
-      
-        }
+        int idx = reads_id[i];
+        int read length = db->read len[idx];
+        int event length = db->et[idx].n;
+    
+        fprintf(stderr,"read length %d event length %d n pairs %d\n", read_length, event_length, n_align_0[i]);
     }
+*/
+   
 
-    if(batch_num_1 > 0)
-    {
-        for(int i=0; i < reads_num_1; i++ )
+    //pthread fill in struct
+     pthread_reverse_aligned_pairs(core,  db, reads_num_0, reads_num_1, n_bands,reads_id);
+
+}
+
+void pthread_reverse_aligned_pairs(core_t* core, db_t* db, int reads_num_0, int reads_num_1, int n_bands,int* reads_id){
+
+        //create threads
+        pthread_t tids[core->opt.num_thread];
+        pthread_arg_rev pt_args[core->opt.num_thread];
+        int32_t t, ret;
+        int32_t i = 0;
+        int reads_num = reads_num_0 + reads_num_1;
+        int32_t num_thread = core->opt.num_thread;
+        int32_t step = (reads_num + num_thread - 1) / num_thread;
+        //todo : check for higher num of threads than the data
+        //current works but many threads are created despite
+
+        //set the data structures
+        for (t = 0; t < num_thread; t++) {
+            pt_args[t].core = core;
+            pt_args[t].db = db;
+            pt_args[t].reads_id = reads_id;
+            pt_args[t].reads_num_0 = reads_num_0;
+            pt_args[t].reads_num_1 = reads_num_1;
+            pt_args[t].n_bands = n_bands;
+            pt_args[t].starti = i;
+            i += step;
+            if (i > reads_num) {
+                pt_args[t].endi = reads_num;
+            } else {
+                pt_args[t].endi = i;
+            }
+
+        }
+
+        //create threads
+        for(t = 0; t < core->opt.num_thread; t++){
+            ret = pthread_create(&tids[t], NULL, pthread_single_reverse, (void*)(&pt_args[t]));
+            NEG_CHK(ret);
+        }
+
+        //pthread joining
+        for (t = 0; t < core->opt.num_thread; t++) {
+            int ret = pthread_join(tids[t], NULL);
+            NEG_CHK(ret);
+        }
+        
+    
+}
+
+void* pthread_single_reverse(void* voidargs) {
+    int32_t i;
+    pthread_arg_rev* args = (pthread_arg_rev*)voidargs;
+    db_t* db = args->db;
+    core_t* core = args->core;
+    int* reads_id = args->reads_id;
+    int reads_num_0 = args->reads_num_0;
+    int reads_num_1 = args->reads_num_1;
+    int n_bands = args->n_bands;
+
+    int* n_align_0 = core->n_align_0;
+    int* aligned_pairs_0 = core->aligned_pairs_0;
+    int* n_align_1 = core->n_align_1;
+    int* aligned_pairs_1 = core->aligned_pairs_1;
+
+    for (i = args->starti; i < args->endi; i++) {
+        int idx = reads_id[i];
+        int read_length = db->read_len[idx];
+        int event_length = db->et[idx].n;
+
+        if(i<reads_num_0)
         {
-            int idx = reads_id[reads_num_0 + i];
-            int read_length = db->read_len[idx];
-            int event_length = db->et[idx].n;
-            if(read_length==10478)
-            {
-                fprintf(stderr,"read_length=%d event_length=%d n_pairs=%d\n", read_length,event_length, n_align_1[i]);
-                for(int j=0;j<n_bands;j++)
+
+            db->n_event_align_pairs[idx] = n_align_0[i];
+             int outIndex = db->n_event_align_pairs[idx]-1;
+         //    
+            if(db->n_event_align_pairs[idx]>0)
+            {     
+                if(read_length==33320&&event_length==66345)
+                     fprintf(stderr,"1. read %d event %d npairs %d outIndex %d\n", read_length, event_length, db->n_event_align_pairs[idx] , outIndex);
+                for(int j=read_length+event_length+2; j>=0; j--)
+                {
+                    int batch = i/BATCH_SIZE;
+                    int read = i%BATCH_SIZE;
+                    int ref_pos = aligned_pairs_0[batch * BATCH_SIZE * 2 *n_bands + j*BATCH_SIZE*2 + read* 2];
+                    int read_pos = aligned_pairs_0[batch * BATCH_SIZE * 2 *n_bands + j*BATCH_SIZE*2 + read*2 + 1];
+                    if(ref_pos>=0 && outIndex>=0)
+                    {
+                        db->event_align_pairs[idx][outIndex].ref_pos = ref_pos;
+                        db->event_align_pairs[idx][outIndex].read_pos = read_pos;
+                        if(read_length==33320&&event_length==66345)
+                            fprintf(stderr,"%d %d\n",ref_pos, read_pos);
+                        outIndex--;
+                    }
+                }
+            }
+        }else
+        {
+
+            db->n_event_align_pairs[idx] = n_align_1[i-reads_num_0];
+            int outIndex = db->n_event_align_pairs[idx]-1;
+          //   fprintf(stderr,"event %d npairs %d outIndex %d\n", event_length, db->n_event_align_pairs[idx] , outIndex);
+            if(db->n_event_align_pairs[idx] > 0)
+            {     
+                if(read_length==33320&&event_length==66345)
+                    fprintf(stderr,"2. read %d event %d npairs %d outIndex %d\n", read_length, event_length, db->n_event_align_pairs[idx] , outIndex);
+                for(int j=read_length+event_length+2; j>=0; j--)
                 {
                     int batch = i/BATCH_SIZE;
                     int read = i%BATCH_SIZE;
                     int ref_pos = aligned_pairs_1[batch * BATCH_SIZE * 2 *n_bands + j*BATCH_SIZE*2 + read* 2];
-                    int read_pos = aligned_pairs_1[batch * BATCH_SIZE * 2 *n_bands + j*BATCH_SIZE*2 + read* 2 + 1];
-                    if(ref_pos>=0)
-                        fprintf(stderr,"%d %d\n", ref_pos, read_pos);
+                    int read_pos = aligned_pairs_1[batch * BATCH_SIZE * 2 *n_bands + j*BATCH_SIZE*2 + read*2 + 1];
+               
+                    if(ref_pos>=0&&outIndex>=0)
+                    {
+                        db->event_align_pairs[idx][outIndex].ref_pos = ref_pos;
+                        db->event_align_pairs[idx][outIndex].read_pos = read_pos;
+                        if(read_length==33320&&event_length==66345)
+                            fprintf(stderr,"%d %d\n",ref_pos, read_pos);
+                        outIndex--;
+                    }
                 }
             }
         }
     }
 
-
-
+    //fprintf(stderr,"Thread %d done\n",(myargs->position)/THREADS);
+    pthread_exit(0);
 }
-
-
 
 
 
@@ -1768,18 +1854,42 @@ void process_db(core_t* core, db_t* db) {
                 realtime() - realtime0, cputime() / (realtime() - realtime0));
             
             double align_start = realtime();
-
             if(db->batch_idx == 0)
                 transfer_model_to_FPGA(core);
- 
             align_db_FPGA_by_len(core,db);
-
             double align_end = realtime();
-
             core->align_FPGA_time += (align_end - align_start);
-
             fprintf(stderr, "[%s::%.3f*%.2f] Banded alignment on FPGA done\n", __func__,
                 realtime() - realtime0, cputime() / (realtime() - realtime0));
+
+            for(int i=0;i<db->n_bam_rec;i++)
+            {
+                int read_length = db->read_len[i];
+                int event_length = db->et[i].n;
+                if(read_length==33320&&event_length==66345)
+                {
+                    fprintf(stderr,"read_len %d event_len %d n_pairs %d \n", read_length, event_length, db->n_event_align_pairs[i]);
+                    for(int j=0; j<db->n_event_align_pairs[i]; j++)
+                        fprintf(stderr,"%d %d\n", db->event_align_pairs[i][j].ref_pos, db->event_align_pairs[i][j].read_pos);
+                }
+            }
+
+            double est_scale_start = realtime();
+            pthread_db(core,db,scaling_single);
+            double est_scale_end = realtime();
+            core->est_scale_time += (est_scale_end-est_scale_start);
+
+            fprintf(stderr, "[%s::%.3f*%.2f] Scaling calibration done\n", __func__,
+                realtime() - realtime0, cputime() / (realtime() - realtime0));
+
+            double meth_start = realtime();
+            pthread_db(core, db, meth_single);
+            double meth_end = realtime();
+            core->meth_time += (meth_end-meth_start);
+
+            fprintf(stderr, "[%s::%.3f*%.2f] HMM done\n", __func__,
+                realtime() - realtime0, cputime() / (realtime() - realtime0));
+            
 
     	#else
         if (core->opt.num_thread == 1) {

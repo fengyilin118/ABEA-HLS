@@ -615,6 +615,20 @@ typedef struct {
    #endif
 } core_t;
 
+/*argument wrapper for the multithreaded framework used for reverse aligned pairs*/
+
+typedef struct{
+    core_t* core;
+    db_t* db;
+    int* reads_id;
+    int reads_num_0;
+    int reads_num_1;
+    int n_bands;
+    int32_t starti;
+    int32_t endi;
+
+}pthread_arg_rev;
+
 /* argument wrapper for the multithreaded framework used for data processing */
 typedef struct {
     core_t* core;
@@ -704,6 +718,10 @@ void* pthread_cpu_reads_single(void* voidargs);
 void align_cpu_reads_async_join(pthread_arg_t *pt_args, pthread_t tid);
 
 void fill_bucket(core_t* core, db_t* db, int bucket, int kmer_size, int max_read_length , int max_event_length, int reads_num, int reads_id[BUCKET_SIZE]);
+
+void pthread_reverse_aligned_pairs(core_t* core, db_t* db, int read_num_0, int read_num_1, int n_bands,int* reads_id);
+
+void* pthread_single_reverse(void* voidargs);
 
 void transfer_model_to_FPGA(core_t * core);
 

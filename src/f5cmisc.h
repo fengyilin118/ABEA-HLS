@@ -58,7 +58,7 @@ int32_t align(AlignedPair* out_2, char* sequence, int32_t sequence_len,
               event_table events, model_t* models, uint32_t kmer_size, scalings_t scaling,
               float sample_rate);
 int32_t postalign(event_alignment_t* alignment, index_pair_t* base_to_event_map, double* events_per_base,
-                  char* sequence, int32_t n_kmers, AlignedPair* event_alignment, int32_t n_events, uint32_t kmer_size);
+                  char* sequence, int32_t n_kmers, AlignedPair* event_alignment, int32_t n_events, uint32_t kmer_size, int read_len, int event_len);
 bool recalibrate_model(model_t* pore_model, uint32_t kmer_size, event_table et, scalings_t* scallings,
                        const event_alignment_t* alignment_output, int32_t num_alignments, bool scale_var, int32_t minNumEventsToRescale);
 
