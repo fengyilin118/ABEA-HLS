@@ -9,3 +9,4 @@ Adaptive Banded Event Alignment (ABEA) stands as a crucial algorithmic component
  GRCh38/hg38 [hg38 FASTA Human Reference Genome](https://drive.google.com/file/d/1Ur3xybIzQGSxuqeByyp5OMrpaRJXCsMI/view?usp=sharing) was used as the reference genomes for alignment.
  
   **Usage**
+The FPGA configuration file is in the binary directory. The host calls two kernel functions implemented in the configuration file.
