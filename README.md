@@ -10,4 +10,4 @@ Adaptive Banded Event Alignment (ABEA) stands as a crucial algorithmic component
  
   **Usage**
   
-The FPGA configuration file is in the binary directory. The host calls two kernel functions implemented in the configuration file.
+In this work, we target Xilinx VU9P offered by Amazon AWS F1 instance. The FPGA configuration file is in the binary directory. The host calls two kernel functions implemented in the configuration file. 
