@@ -16,3 +16,18 @@ In this work, we target Xilinx VU9P offered by Amazon AWS F1 instance. The FPGA 
 - `align_top_stream_no_group` for ultra-long read alignments; 1 instance is deployed named as _align_top_stream_no_group_1_.
 
 [Xilinx Runtime Library (XRT) API](https://docs.amd.com/r/en-US/ug1393-vitis-application-acceleration/Getting-Started-with-Vitis) is invoked to handle the data transfer between Host DRAM to FPGA DRAM and the launch of specific kernels.
+
+The interface of the two kinds of kernel is as follows.
+- **reset** :
+- **event_mean** :
+- **read** :
+- **n_align** :
+- **aligned_ref_read_pos** :
+- **model_data** :
+- **trace_out** :
+- **length_int** :
+- **scailings** :
+- **lps** :
+- **max_event_t_length** :
+- **max_sequence_length** :
+- **batch_num** :
