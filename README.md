@@ -18,6 +18,7 @@ In this work, we target Xilinx VU9P offered by Amazon AWS F1 instance. The FPGA 
 [Xilinx Runtime Library (XRT) API](https://docs.amd.com/r/en-US/ug1393-vitis-application-acceleration/Getting-Started-with-Vitis) is invoked to handle the data transfer between Host DRAM to FPGA DRAM and the launch of specific kernels.
 
 The interface of the two kinds of kernel is as follows. Generally, one initialization launching is needed for all kernels; firstly. After that, regular reads are collected into buckets for being processed in pipelined fashion by launching   sucessive _align_top_stream_ kernels. Each ultra-long read is processed one by one by sucessive launching  _align_top_stream_no_group_ kernel.
+
 - **reset** : flag to identify initialization or performing alignments; if launching kernel for initialzion, flag is set as 1. if launching kernel for alignments, flag is set as 0.
 - **event_mean** : mean signal values of events
 - **read** : bases of reads
@@ -30,8 +31,10 @@ The interface of the two kinds of kernel is as follows. Generally, one initializ
 - **lps** : skip penalty
 - **max_event_t_length** : maximum number of events in this bucket
 - **max_sequence_length** : maximum size of read bases in this bucket
-- **batch_num** :
+- **batch_num** : number of batch in this bucket; one batch of reads perform alignment in full pipeline and batch size is 8 reads in our implementaion. _batch_num_ = ceil(_bucket_size_/_batch_size_) for _align_top_stream_ kernel. _batch_num_ = 1 for  _align_top_stream_no_group_ kernel.
 
 This is a simple example for launching kernel to perform inter-read alignments
 
+'''
 auto run_0 = kernel_0(0, event_mean_bo_0,read_bo_0,n_align_bo_0,aligned_pairs_bo_0,NULL,trace_table_bo_0, left_out_bo_0, length_int_bo_0,scaling_info_bo_0,lp_info_bo_0,event_offset,reads_offset,batch_num_0);
+'''
