@@ -17,17 +17,21 @@ In this work, we target Xilinx VU9P offered by Amazon AWS F1 instance. The FPGA 
 
 [Xilinx Runtime Library (XRT) API](https://docs.amd.com/r/en-US/ug1393-vitis-application-acceleration/Getting-Started-with-Vitis) is invoked to handle the data transfer between Host DRAM to FPGA DRAM and the launch of specific kernels.
 
-The interface of the two kinds of kernel is as follows.
-- **reset** :
-- **event_mean** :
-- **read** :
-- **n_align** :
-- **aligned_ref_read_pos** :
-- **model_data** :
-- **trace_out** :
-- **length_int** :
-- **scailings** :
-- **lps** :
-- **max_event_t_length** :
-- **max_sequence_length** :
+The interface of the two kinds of kernel is as follows. Generally, one initialization launching is needed for all kernels; firstly. After that, regular reads are collected into buckets for being processed in pipelined fashion by launching   sucessive _align_top_stream_ kernels. Each ultra-long read is processed one by one by sucessive launching  _align_top_stream_no_group_ kernel.
+- **reset** : flag to identify initialization or performing alignments; if launching kernel for initialzion, flag is set as 1. if launching kernel for alignments, flag is set as 0.
+- **event_mean** : mean signal values of events
+- **read** : bases of reads
+- **n_align** : the output of the number of (events,k-mer) pairs
+- **aligned_ref_read_pos** : the output of (events,k-mer) pairs
+- **model_data** : pore-model table
+- **trace_out** : allocated memory for trace table; Assigned values are not needed.
+- **length_int** : number of events and size of read bases for each read
+- **scailings** : scaling parameters for the signal
+- **lps** : skip penalty
+- **max_event_t_length** : maximum number of events in this bucket
+- **max_sequence_length** : maximum size of read bases in this bucket
 - **batch_num** :
+
+This is a simple example for launching kernel to perform inter-read alignments
+
+auto run_0 = kernel_0(0, event_mean_bo_0,read_bo_0,n_align_bo_0,aligned_pairs_bo_0,NULL,trace_table_bo_0, left_out_bo_0, length_int_bo_0,scaling_info_bo_0,lp_info_bo_0,event_offset,reads_offset,batch_num_0);
