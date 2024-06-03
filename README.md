@@ -26,7 +26,7 @@ The interface of the two kinds of kernel is as follows. Generally, one initializ
 - **aligned_ref_read_pos** : the output of (events,k-mer) pairs
 - **model_data** : pore-model table
 - **trace_out** : allocated memory for trace table; Assigned values are not needed.
-- **length_int** : number of events and size of read bases for each read
+- **length_int** : number of events and size of read bases for each read; 0s are padded for unfulled bucket.
 - **scailings** : scaling parameters for the signal
 - **lps** : skip penalty
 - **max_event_t_length** : maximum number of events in this bucket
@@ -35,6 +35,12 @@ The interface of the two kinds of kernel is as follows. Generally, one initializ
 
 This is a simple example for launching kernel to perform inter-read alignments
 
-'''
-auto run_0 = kernel_0(0, event_mean_bo_0,read_bo_0,n_align_bo_0,aligned_pairs_bo_0,NULL,trace_table_bo_0, left_out_bo_0, length_int_bo_0,scaling_info_bo_0,lp_info_bo_0,event_offset,reads_offset,batch_num_0);
-'''
+```
+kernel_0 = xrt::kernel(core->device, uuid, "align_top_stream:{align_top_stream_1}");
+auto run_0 = core->kernel_0(1 ,NULL,NULL,NULL,NULL, core->model_data_bo_0,NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
+run_0.wait();
+# transfer input from FPGA DRAM to Host DRAM
+run_0 = kernel_0(0, event_mean_bo_0,read_bo_0,n_align_bo_0,aligned_pairs_bo_0,NULL,trace_table_bo_0, left_out_bo_0, length_int_bo_0,scaling_info_bo_0,lp_info_bo_0,event_offset,reads_offset,batch_num_0);
+run_0.wait();
+# transfer output from FPGA DRAM to Host DRAM
+```
