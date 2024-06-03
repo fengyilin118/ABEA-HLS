@@ -24,7 +24,7 @@ The interface of the two kinds of kernel is as follows. Generally, one initializ
 - **read** : bases of reads
 - **n_align** : the output of the number of (events,k-mer) pairs
 - **aligned_ref_read_pos** : the output of (events,k-mer) pairs
-- **model_data** : pore-model table
+- **model_data** : pore-model table; model_table are transferred to FPGA DRAM in initialization launch.
 - **trace_out** : allocated memory for trace table; Assigned values are not needed.
 - **length_int** : number of events and size of read bases for each read; 0s are padded for unfulled bucket.
 - **scailings** : scaling parameters for the signal
@@ -36,6 +36,7 @@ The interface of the two kinds of kernel is as follows. Generally, one initializ
 This is a simple example for launching kernel to perform inter-read alignments
 
 ```
+# initialization
 kernel_0 = xrt::kernel(core->device, uuid, "align_top_stream:{align_top_stream_1}");
 auto run_0 = core->kernel_0(1 ,NULL,NULL,NULL,NULL, core->model_data_bo_0,NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1);
 run_0.wait();
