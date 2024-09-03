@@ -11,11 +11,11 @@ TThe Adaptive Banded Event Alignment (ABEA) is a crucial  component in sequence 
  ## Code and FPGA BIN file
  Our contribution mainly attributes to designing two type of Compute Unites on FPGA: Pipeline CU for regular reads and Ultra Long CU for ultra-long reads, as well as bucketing scheduling for load balance.
  - **The FPGA BIN file is in the [binary directory](https://github.com/fengyilin118/ABEA-HLS/tree/main/binary)**. The details of HLS code will be updated later.
- - Bucketing scheduling is implemented as [*align_db_FPGA_by_len*](https://github.com/fengyilin118/ABEA-HLS/blob/main/src/f5c.c) function.
+ - Bucket scheduling is implemented as [*align_db_FPGA_by_len*](https://github.com/fengyilin118/ABEA-HLS/blob/main/src/f5c.c) function.
 
 ## Kernel
 
-The host calls two kinds of kernels implemented in the configuration file. 
+The host calls two kinds of kernels (Pipeline CU and Ultra Long CU). 
 
 - `align_top_stream` for pipelined inter-read alignments; 2 instances are deployed named as _align_top_stream_1_ and _align_top_stream_2_.
 - `align_top_stream_no_group` for ultra-long read alignments; 1 instance is deployed named as _align_top_stream_no_group_1_.
