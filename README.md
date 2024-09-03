@@ -1,6 +1,6 @@
 # FPGA accelerator for ABEA using High-Level Synthesis
 
-Adaptive Banded Event Alignment (ABEA) stands as a crucial algorithmic component in sequence polishing and DNA methylation detection, employing a dynamic programming strategy to align raw Nanopore signal to reference reads. ABEA was first introduced by [Nanopolish](https://github.com/jts/nanopolish) and it is the bottleneck for both nanopolish call-methylation module and nanopolish eventalign module. The proposed accelerator with Xilinx Vivado High-Level Synthesis (HLS) targets Xilinx UV9P FPGA board and was implemented based on GPU accleration [f5c](https://github.com/hasindu2008/f5c). The proposed accelerator obtains an average throughput speedup of 10.05 $\times$ over the CPU-only implementation, and an average 1.81 $\times$ speedup over the-state-of-art GPU acceleration on NVIDIA GPU V100 with 7.2\% of the energy.
+TThe Adaptive Banded Event Alignment (ABEA) is a crucial  component in sequence polishing and DNA methylation detection, utilizing a dynamic programming strategy to align raw Nanopore signals to a biological reference sequence to correct sequencing errors and detect the modified nucleotides. Originally introduced by [Nanopolish](https://github.com/jts/nanopolish), ABEA serves as the primary bottleneck in both the Nanopolish call-methylation and eventalign modules. The proposed accelerator, implemented using Xilinx Vivado High-Level Synthesis (HLS), targets the Xilinx VU9P FPGA board and is based on the GPU-accelerated [f5c](https://github.com/hasindu2008/f5c) framework. When tested on an Amazon AWS F1 instance, this FPGA-based accelerator achieves an average throughput speedup of 10.05X over the CPU-only implementation and an average 1.81X speedup over the state-of-the-art GPU acceleration on the NVIDIA V100, while consuming only 7.2% of the energy.
 
  ## Dataset
 
@@ -10,7 +10,7 @@ Adaptive Banded Event Alignment (ABEA) stands as a crucial algorithmic component
  
  ## Code and FPGA BIN file
   
-In this work, we target Xilinx VU9P offered by Amazon AWS F1 instance. **The FPGA BIN file is in the [binary directory](https://github.com/fengyilin118/ABEA-HLS/tree/main/binary)**. The details of HLS code will be updated later.
+ **The FPGA BIN file is in the [binary directory](https://github.com/fengyilin118/ABEA-HLS/tree/main/binary)**. The details of HLS code will be updated later.
 
 ## Kernel
 
