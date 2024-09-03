@@ -4,9 +4,9 @@ TThe Adaptive Banded Event Alignment (ABEA) is a crucial  component in sequence 
 
  ## Dataset
 
- 'Nanopore WGS Consortium' sequencing dataset was used to conduct our evaluation, which can downloaded from [Whole Human Genome Sequencing Project](https://github.com/nanopore-wgs-consortium/NA12878/blob/master/Genome.md). Specifically, we chose five individual flowcells FAB39088, FAF05869, FAF18554, FAB41174 and FAB42395.
+- 'Nanopore WGS Consortium' sequencing dataset was used to conduct our evaluation, which can downloaded from [Whole Human Genome Sequencing Project](https://github.com/nanopore-wgs-consortium/NA12878/blob/master/Genome.md). Specifically, we chose five individual flowcells FAB39088, FAF05869, FAF18554, FAB41174 and FAB42395.
  
- GRCh38/hg38 [hg38 FASTA Human Reference Genome](https://drive.google.com/file/d/1Ur3xybIzQGSxuqeByyp5OMrpaRJXCsMI/view?usp=sharing) was used as the reference genomes for alignment.
+- GRCh38/hg38 [hg38 FASTA Human Reference Genome](https://drive.google.com/file/d/1Ur3xybIzQGSxuqeByyp5OMrpaRJXCsMI/view?usp=sharing) was used as the reference genomes for alignment.
  
  ## Code and FPGA BIN file
  Our contribution mainly attributes to designing two type of Compute Unites on FPGA: Pipeline CU for regular reads and Ultra Long CU for ultra-long reads, as well as bucketing scheduling for load balance.
