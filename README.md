@@ -1,6 +1,6 @@
 # FPGA accelerator for ABEA using High-Level Synthesis
 
-Adaptive Banded Event Alignment (ABEA) stands as a crucial algorithmic component in sequence polishing and DNA methylation detection, employing a dynamic programming strategy to align raw Nanopore signal to reference reads. ABEA was first introduced by [Nanopolish](https://github.com/jts/nanopolish) and it is the bottleneck for both nanopolish call-methylation module and nanopolish eventalign module. The proposed accelerator with Xilinx Vivado High-Level Synthesis (HLS) targets Xilinx UV9P FPGA board and was implemented based on GPU accleration [f5c](https://github.com/hasindu2008/f5c). The proposed accelerator obtains an average throughput speedup of 10.9 $\times$ over the CPU-only implementation, and an average 1.82 $\times$ speedup over the-state-of-art GPU acceleration with 3.8\% of the energy.
+Adaptive Banded Event Alignment (ABEA) stands as a crucial algorithmic component in sequence polishing and DNA methylation detection, employing a dynamic programming strategy to align raw Nanopore signal to reference reads. ABEA was first introduced by [Nanopolish](https://github.com/jts/nanopolish) and it is the bottleneck for both nanopolish call-methylation module and nanopolish eventalign module. The proposed accelerator with Xilinx Vivado High-Level Synthesis (HLS) targets Xilinx UV9P FPGA board and was implemented based on GPU accleration [f5c](https://github.com/hasindu2008/f5c). The proposed accelerator obtains an average throughput speedup of 10.05 $\times$ over the CPU-only implementation, and an average 1.81 $\times$ speedup over the-state-of-art GPU acceleration on NVIDIA GPU V100 with 7.2\% of the energy.
 
  ## Dataset
 
@@ -8,9 +8,11 @@ Adaptive Banded Event Alignment (ABEA) stands as a crucial algorithmic component
  
  GRCh38/hg38 [hg38 FASTA Human Reference Genome](https://drive.google.com/file/d/1Ur3xybIzQGSxuqeByyp5OMrpaRJXCsMI/view?usp=sharing) was used as the reference genomes for alignment.
  
- ## Kernel
+ ## Code and FPGA BIN file
   
-In this work, we target Xilinx VU9P offered by Amazon AWS F1 instance. **The FPGA configuration file is in the [binary directory](https://github.com/fengyilin118/ABEA-HLS/tree/main/binary)**. The details of HLS code will be updated later.
+In this work, we target Xilinx VU9P offered by Amazon AWS F1 instance. **The FPGA BIN file is in the [binary directory](https://github.com/fengyilin118/ABEA-HLS/tree/main/binary)**. The details of HLS code will be updated later.
+
+## Kernel
 
 The host calls two kinds of kernels implemented in the configuration file. 
 
