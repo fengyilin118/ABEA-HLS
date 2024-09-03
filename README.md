@@ -10,7 +10,9 @@ Adaptive Banded Event Alignment (ABEA) stands as a crucial algorithmic component
  
  ## Kernel
   
-In this work, we target Xilinx VU9P offered by Amazon AWS F1 instance. The FPGA configuration file is in the binary directory. The host calls two kinds of kernels implemented in the configuration file. 
+In this work, we target Xilinx VU9P offered by Amazon AWS F1 instance. **The FPGA configuration file is in the [binary directory](https://github.com/fengyilin118/ABEA-HLS/tree/main/binary)**. The details of HLS code will be updated later.
+
+The host calls two kinds of kernels implemented in the configuration file. 
 
 - `align_top_stream` for pipelined inter-read alignments; 2 instances are deployed named as _align_top_stream_1_ and _align_top_stream_2_.
 - `align_top_stream_no_group` for ultra-long read alignments; 1 instance is deployed named as _align_top_stream_no_group_1_.
